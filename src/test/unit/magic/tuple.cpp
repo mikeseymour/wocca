@@ -13,11 +13,28 @@ TEST_CASE("wocca/magic/tuple") {
     typedef std::tuple<t1, t2, t3> tuple;
     CHECK_META(tuple, make<t1, t2, t3>);
 
-    CHECK_FALSE((contains<t1, std::tuple<>>::value));
+    CHECK_FALSE((contains<t1, empty>::value));
     CHECK((contains<t1, tuple>::value));
     CHECK((contains<t2, tuple>::value));
     CHECK((contains<t3, tuple>::value));
     CHECK_FALSE((contains<t4, tuple>::value));
+
+    CHECK_FALSE((before<t1,t1,tuple>::value));
+    CHECK      ((before<t1,t2,tuple>::value));
+    CHECK      ((before<t1,t3,tuple>::value));
+    CHECK_FALSE((before<t1,t4,tuple>::value));
+    CHECK_FALSE((before<t2,t1,tuple>::value));
+    CHECK_FALSE((before<t2,t2,tuple>::value));
+    CHECK      ((before<t2,t3,tuple>::value));
+    CHECK_FALSE((before<t2,t4,tuple>::value));
+    CHECK_FALSE((before<t3,t1,tuple>::value));
+    CHECK_FALSE((before<t3,t2,tuple>::value));
+    CHECK_FALSE((before<t3,t3,tuple>::value));
+    CHECK_FALSE((before<t3,t4,tuple>::value));
+    CHECK_FALSE((before<t4,t1,tuple>::value));
+    CHECK_FALSE((before<t4,t2,tuple>::value));
+    CHECK_FALSE((before<t4,t3,tuple>::value));
+    CHECK_FALSE((before<t4,t4,tuple>::value));
 
     typedef std::tuple<t1, t1, t2, t3> p1;
     typedef std::tuple<t2, t1, t2, t3> p2;
