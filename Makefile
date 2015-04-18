@@ -1,7 +1,4 @@
-CXX = g++-4.8
-LD = g++-4.8
-CXXFLAGS += -Isrc/wocca -Isrc
-CXXFLAGS += -std=c++0x -O3 -W -Wall -Wextra -Werror -g
+CXXFLAGS += -Isrc -std=c++11 -O3 -W -Wall -Wextra -Werror -g -MMD -MP
 #LDLIBS_EXE := obj/wocca/libwocca.a -pthread -lasound
 
 SHELL := /bin/bash
@@ -20,8 +17,7 @@ ut_srcs_missing := $(filter-out $(ut_srcs),$(ut_srcs_expected))
 relver ?= $(shell date +%F)
 
 quick : unittest apps
-all : quick release integrationtest
-release :
+all : quick integrationtest
 
 unittest : obj/test/unit/passed 
 ifdef ut_srcs_missing
@@ -32,23 +28,9 @@ endif
 integrationtest: obj/test/integration/main
 
 apps : $(app_srcs:src/%.cpp=obj/%)
-clean : ; @rm -rf obj release
+clean : ; @rm -rf obj
 
-%_release : reldir = $(patsubst %_release,release/%/$(relver),$@)
-%_release : relzip = $(patsubst %_release,release/%-$(relver).tar.bz2,$@)
-%_release : relzip2 = $(patsubst %_release,release/%-snapshot.tar.bz2,$@)
-
-dummy_release :
-	@echo RELEASE $(relzip)
-	@rm -rf $(reldir)
-	@mkdir -p $(reldir)
-	@cp $^ $(reldir)
-	@hg summary > $(reldir)/VERSION
-	@(cd $(reldir)/.. && tar cjf $(notdir $(relzip)) $(relver))
-	@mv $(reldir)/../$(notdir $(relzip)) $(relzip)
-	@cp $(relzip) $(relzip2)
-
-.PHONY : all release clean dummy_release
+.PHONY : all clean
 
 -include $(all_srcs:src/%.cpp=obj/%.d)
 
@@ -67,13 +49,9 @@ obj/test/integration/main : $(it_srcs:src/%.cpp=obj/%.o)
 obj/%.o : src/%.cpp
 	@echo C++ $<
 	@mkdir -p $(dir $@)
-	@$(COMPILE.cpp) $(OUTPUT_OPTION) -MMD $<
+	@$(COMPILE.cpp) $(OUTPUT_OPTION) $<
 
 obj/test/%/passed : obj/test/%/main
 	@echo UNIT TEST
 	@ulimit -s 8192; $<
 	@touch $@
-
-# This forces dependencies on removed headers to be recompiled.
-# Otherwise, with no rule targetting the missing header, its dependencies will be ignored.
-src/%.h : ;
