@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <tuple>
 
-// Metafunctions dealing with tuples
+// Functions and metafunctions for dealing with tuples
 
 namespace wocca {
 namespace magic {
@@ -39,19 +39,28 @@ template <typename T, typename... Ts> struct prepend<T, make<Ts...>, true>  : ma
 
 // Add a type to the start of a tuple if it's not already in the tuple
 template <typename T, typename Tuple> struct prepend_unique :
-    prepend<T, Tuple, !contains<T, Tuple>::value> {};
+    prepend<T, Tuple, !contains<T, Tuple>()> {};
+
+// Tuple size, for value or reference types
+template <typename Tuple> struct size :
+    std::tuple_size<typename std::decay<Tuple>::type> {};
 
 // Iterate over all elements of a tuple instance
-template <typename Tuple, typename Functor, size_t I>
-typename std::enable_if<I >= std::tuple_size<Tuple>::value, void>::type
-for_each(Tuple &, Functor) {}
+template <typename Tuple, typename Functor, bool Forward=true, size_t I=size<Tuple>()>
+typename std::enable_if<I == 0>::type
+visit(Tuple &&, Functor &&) {}
 
-template <typename Tuple, typename Functor, size_t I=0>
-typename std::enable_if<I < std::tuple_size<Tuple>::value, void>::type
-for_each(Tuple & t, Functor fn)
-{
-    fn(std::get<I>(t));
-    for_each<Tuple, Functor, I+1>(t, fn);
+template <typename Tuple, typename Functor, bool Forward=true, size_t I=size<Tuple>()>
+typename std::enable_if<I != 0>::type
+visit(Tuple && t, Functor && f) {
+    f(std::get<Forward ? size<Tuple>()-I : I-1>(t));
+    visit<Tuple, Functor, Forward, I-1>(std::forward<Tuple>(t), std::forward<Functor>(f));
+}
+
+// Iterate backwards over all elements of a tuple instance
+template <typename Tuple, typename Functor>
+void rvisit(Tuple && t, Functor f) {
+    visit<Tuple,Functor,false>(std::forward<Tuple>(t), std::forward<Functor>(f));
 }
 
 }}}

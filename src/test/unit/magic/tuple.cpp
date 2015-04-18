@@ -54,4 +54,26 @@ TEST_CASE("wocca/magic/tuple") {
     CHECK_META(tuple, prepend_unique<t2, tuple>);
     CHECK_META(tuple, prepend_unique<t3, tuple>);
     CHECK_META(p4,    prepend_unique<t4, tuple>);
+
+    {
+        std::string visit_check;
+        visit(std::tuple<>(), [&](char c){visit_check += c;});
+        CHECK(visit_check == "");
+        visit(std::make_tuple('a','b','c','d'), [&](char c){visit_check += c;});
+        CHECK(visit_check == "abcd");
+        auto t = std::make_tuple('e','f','g','h');
+        visit(t, [&](char c){visit_check += c;});
+        CHECK(visit_check == "abcdefgh");
+    }
+
+    {
+        std::string visit_check;
+        rvisit(std::tuple<>(), [&](char c){visit_check += c;});
+        CHECK(visit_check == "");
+        rvisit(std::make_tuple('a','b','c','d'), [&](char c){visit_check += c;});
+        CHECK(visit_check == "dcba");
+        auto t = std::make_tuple('e','f','g','h');
+        rvisit(t, [&](char c){visit_check += c;});
+        CHECK(visit_check == "dcbahgfe");
+    }
 }
