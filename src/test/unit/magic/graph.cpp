@@ -1,5 +1,6 @@
 #include "wocca/magic/graph.h"
 
+namespace {
 using namespace wocca::magic;
 
 // An acyclic graph with splits, joins, and disjoint sections:
@@ -130,3 +131,6 @@ static_assert(tuple::before<G, J, sorted>(), "");
 static_assert(tuple::before<G, K, sorted>(), "");
 static_assert(tuple::before<H, K, sorted>(), "");
 static_assert(tuple::before<I, L, sorted>(), "");
+
+}
+

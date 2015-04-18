@@ -1,14 +1,14 @@
 #include "wocca/magic/basic.h"
-#include "test/magic.h"
 
+#include <type_traits>
+
+namespace {
 using namespace wocca::magic;
 
-TEST_CASE("wocca/magic/basic") {
-    struct unwrapped {};
-    struct wrapped {typedef unwrapped result;};
+struct unwrapped {};
+struct wrapped {typedef unwrapped result;};
 
-    CHECK_META(unwrapped, self<unwrapped>);
-    CHECK_META(unwrapped, self<wrapped>);
+static_assert(std::is_same<unwrapped, self<unwrapped>::result>(), "");
+static_assert(std::is_same<unwrapped, self<wrapped>::result>(), "");
 
-    CHECK(typeid(self<wrapped>).name() == typeid(self<unwrapped>).name());
 }
