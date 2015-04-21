@@ -3,6 +3,7 @@
 
 #include "wocca/magic/basic.h"
 
+#include <cstddef>
 #include <type_traits>
 #include <tuple>
 
