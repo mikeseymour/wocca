@@ -2,82 +2,60 @@
 #include "test/catch.hpp"
 
 namespace {
-using namespace wocca::magic::tuple;
-
-static_assert(std::is_same<std::tuple<>, empty::result>(), "");
+using namespace wocca::magic;
+using namespace tuples;
 
 struct t1 {};
 struct t2 {};
 struct t3 {};
 struct t4 {};
 
-typedef std::tuple<t1, t2, t3> tuple;
-static_assert(std::is_same<tuple, make<t1, t2, t3>::result>(), "");
+typedef tuple<> empty;
+static_assert(size<empty> == 0);
 
-static_assert(!contains<t1, empty>(), "");
-static_assert( contains<t1, tuple>(), "");
-static_assert( contains<t2, tuple>(), "");
-static_assert( contains<t3, tuple>(), "");
-static_assert(!contains<t4, tuple>(), "");
+typedef tuple<t1, t2, t3> three;
+static_assert(size<three> == 3);
 
-static_assert(!before<t1,t1,tuple>(), "");
-static_assert( before<t1,t2,tuple>(), "");
-static_assert( before<t1,t3,tuple>(), "");
-static_assert(!before<t1,t4,tuple>(), "");
-static_assert(!before<t2,t1,tuple>(), "");
-static_assert(!before<t2,t2,tuple>(), "");
-static_assert( before<t2,t3,tuple>(), "");
-static_assert(!before<t2,t4,tuple>(), "");
-static_assert(!before<t3,t1,tuple>(), "");
-static_assert(!before<t3,t2,tuple>(), "");
-static_assert(!before<t3,t3,tuple>(), "");
-static_assert(!before<t3,t4,tuple>(), "");
-static_assert(!before<t4,t1,tuple>(), "");
-static_assert(!before<t4,t2,tuple>(), "");
-static_assert(!before<t4,t3,tuple>(), "");
-static_assert(!before<t4,t4,tuple>(), "");
+static_assert(!contains<t1,empty>);
+static_assert( contains<t1,three>);
+static_assert( contains<t2,three>);
+static_assert( contains<t3,three>);
+static_assert(!contains<t4,three>);
 
-typedef std::tuple<t1, t1, t2, t3> p1;
-typedef std::tuple<t2, t1, t2, t3> p2;
-typedef std::tuple<t3, t1, t2, t3> p3;
-typedef std::tuple<t4, t1, t2, t3> p4;
-static_assert(std::is_same<p1, prepend<t1, tuple>::result>(), "");
-static_assert(std::is_same<p2, prepend<t2, tuple>::result>(), "");
-static_assert(std::is_same<p3, prepend<t3, tuple>::result>(), "");
-static_assert(std::is_same<p4, prepend<t4, tuple>::result>(), "");
+static_assert(!before<t1,t1,empty>);
+static_assert(!before<t1,t2,empty>);
+static_assert(!before<t1,t1,three>);
+static_assert( before<t1,t2,three>);
+static_assert( before<t1,t3,three>);
+static_assert(!before<t1,t4,three>);
+static_assert(!before<t2,t1,three>);
+static_assert(!before<t2,t2,three>);
+static_assert( before<t2,t3,three>);
+static_assert(!before<t2,t4,three>);
+static_assert(!before<t3,t1,three>);
+static_assert(!before<t3,t2,three>);
+static_assert(!before<t3,t3,three>);
+static_assert(!before<t3,t4,three>);
+static_assert(!before<t4,t1,three>);
+static_assert(!before<t4,t2,three>);
+static_assert(!before<t4,t3,three>);
+static_assert(!before<t4,t4,three>);
 
-static_assert(std::is_same<tuple, prepend<t1, tuple, false>::result>(), "");
-static_assert(std::is_same<tuple, prepend<t2, tuple, false>::result>(), "");
-static_assert(std::is_same<tuple, prepend<t3, tuple, false>::result>(), "");
-static_assert(std::is_same<tuple, prepend<t4, tuple, false>::result>(), "");
-
-static_assert(std::is_same<tuple, prepend_unique<t1, tuple>::result>(), "");
-static_assert(std::is_same<tuple, prepend_unique<t2, tuple>::result>(), "");
-static_assert(std::is_same<tuple, prepend_unique<t3, tuple>::result>(), "");
-static_assert(std::is_same<p4,    prepend_unique<t4, tuple>::result>(), "");
+static_assert(same<prepend<t1,tuple<>>, tuple<t1>>);
+static_assert(same<prepend<t1,tuple<t2>>, tuple<t1,t2>>);
+static_assert(same<prepend<t1,tuple<t2,t3>>, tuple<t1,t2,t3>>);
+static_assert(same<prepend<t1,tuple<t2,t3,t4>>, tuple<t1, t2, t3, t4>>);
 
 TEST_CASE("wocca/magic/tuple/visit")
 {
-    std::string visit_check;
-    visit(std::tuple<>(), [&](char c){visit_check += c;});
-    CHECK(visit_check == "");
-    visit(std::make_tuple('a','b','c','d'), [&](char c){visit_check += c;});
-    CHECK(visit_check == "abcd");
-    auto t = std::make_tuple('e','f','g','h');
-    visit(t, [&](char c){visit_check += c;});
-    CHECK(visit_check == "abcdefgh");
-}
-
-TEST_CASE("wocca/magic/tuple/rvisit")
-{
-    std::string visit_check;
-    rvisit(std::tuple<>(), [&](char c){visit_check += c;});
-    CHECK(visit_check == "");
-    rvisit(std::make_tuple('a','b','c','d'), [&](char c){visit_check += c;});
-    CHECK(visit_check == "dcba");
-    auto t = std::make_tuple('e','f','g','h');
-    rvisit(t, [&](char c){visit_check += c;});
-    CHECK(visit_check == "dcbahgfe");
+    std::ostringstream check;
+    auto f = [&](auto const & x){check << x;};
+    wocca::magic::tuple().visit(f);
+    CHECK(check.str() == "");
+    wocca::magic::tuple('a','b','c',1,2,3).visit(f);
+    CHECK(check.str() == "abc123");
+    wocca::magic::tuple{'d','e','f',4,5,6}.rvisit(f);
+    CHECK(check.str() == "abc123654fed");
 }
 
 }

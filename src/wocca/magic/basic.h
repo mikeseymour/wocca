@@ -1,21 +1,15 @@
-#ifndef WOCCA_MAGIC_BASIC_H
-#define WOCCA_MAGIC_BASIC_H
-
-// Basic building blocks for template metaprograms
-
+#pragma once
 namespace wocca {
 namespace magic {
 
-// Helper to extract a wrapped metafunction result
-template <typename T> T meta_result(...);
-template <typename T> typename T::result meta_result(typename T::result*);
+// Choose a type depending on a condition.
+template <bool, class T1, class> struct conditional_ {using type = T1;};
+template <class T1, class T2> struct conditional_<false,T1,T2> {using type = T2;};
+template <bool C, class T1, class T2> using conditional = typename conditional_<C,T1,T2>::type;
 
-// Wrap a type as a metafunction result.
-// In general, metafunctions results will be a nested type called "result",
-// often defined by ultimately inheriting from some specialisation of "meta".
-template <typename T> struct meta {typedef T result;};
-
-template <typename T> using self = meta<decltype(meta_result<T>(0))>;
+// Compare two types
+template <class, class> constexpr bool same = false;
+template <class T> constexpr bool same<T,T> = true;
 
 }}
-#endif
+

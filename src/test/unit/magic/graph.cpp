@@ -2,6 +2,7 @@
 
 namespace {
 using namespace wocca::magic;
+using namespace tuples;
 
 // An acyclic graph with splits, joins, and disjoint sections:
 //
@@ -29,7 +30,7 @@ struct J {};
 struct K {};
 struct L {};
 
-typedef std::tuple<
+typedef tuple<
     graph::edge<C,F>,
     graph::edge<D,E>,
     graph::edge<B,D>,
@@ -43,94 +44,104 @@ typedef std::tuple<
     graph::edge<H,K>
 > edges;
 
-typedef graph::nodes<edges>::result nodes;
-static_assert(tuple::size<nodes>() == 12, "");
-static_assert(tuple::contains<A, nodes>(), "");
-static_assert(tuple::contains<B, nodes>(), "");
-static_assert(tuple::contains<C, nodes>(), "");
-static_assert(tuple::contains<D, nodes>(), "");
-static_assert(tuple::contains<E, nodes>(), "");
-static_assert(tuple::contains<F, nodes>(), "");
-static_assert(tuple::contains<G, nodes>(), "");
-static_assert(tuple::contains<H, nodes>(), "");
-static_assert(tuple::contains<I, nodes>(), "");
-static_assert(tuple::contains<J, nodes>(), "");
-static_assert(tuple::contains<K, nodes>(), "");
-static_assert(tuple::contains<L, nodes>(), "");
+using nodes = graph::nodes<edges>;
+static_assert(size<nodes> == 12);
+static_assert(contains<A, nodes>);
+static_assert(contains<B, nodes>);
+static_assert(contains<C, nodes>);
+static_assert(contains<D, nodes>);
+static_assert(contains<E, nodes>);
+static_assert(contains<F, nodes>);
+static_assert(contains<G, nodes>);
+static_assert(contains<H, nodes>);
+static_assert(contains<I, nodes>);
+static_assert(contains<J, nodes>);
+static_assert(contains<K, nodes>);
+static_assert(contains<L, nodes>);
 
-typedef graph::adj<A, edges>::result adjA;
-static_assert(tuple::size<adjA>() == 2, "");
-static_assert(tuple::contains<B, adjA>(), "");
-static_assert(tuple::contains<C, adjA>(), "");
+typedef graph::adj<A, edges> adjA;
+static_assert(size<adjA> == 2);
+static_assert(contains<B, adjA>);
+static_assert(contains<C, adjA>);
 
-typedef graph::adj<B, edges>::result adjB;
-static_assert(tuple::size<adjB>() == 1, "");
-static_assert(tuple::contains<D, adjB>(), "");
+typedef graph::adj<B, edges> adjB;
+static_assert(size<adjB> == 1);
+static_assert(contains<D, adjB>);
 
-typedef graph::adj<C, edges>::result adjC;
-static_assert(tuple::size<adjC>() == 1, "");
-static_assert(tuple::contains<F, adjC>(), "");
+typedef graph::adj<C, edges> adjC;
+static_assert(size<adjC> == 1);
+static_assert(contains<F, adjC>);
 
-typedef graph::adj<D, edges>::result adjD;
-static_assert(tuple::size<adjD>() == 1, "");
-static_assert(tuple::contains<E, adjD>(), "");
+typedef graph::adj<D, edges> adjD;
+static_assert(size<adjD> == 1);
+static_assert(contains<E, adjD>);
 
-typedef graph::adj<E, edges>::result adjE;
-static_assert(tuple::size<adjE>() == 1, "");
-static_assert(tuple::contains<G, adjE>(), "");
+typedef graph::adj<E, edges> adjE;
+static_assert(size<adjE> == 1);
+static_assert(contains<G, adjE>);
 
-typedef graph::adj<F, edges>::result adjF;
-static_assert(tuple::size<adjF>() == 1, "");
-static_assert(tuple::contains<G, adjF>(), "");
+typedef graph::adj<F, edges> adjF;
+static_assert(size<adjF> == 1);
+static_assert(contains<G, adjF>);
 
-typedef graph::adj<G, edges>::result adjG;
-static_assert(tuple::size<adjG>() == 2, "");
-static_assert(tuple::contains<J, adjG>(), "");
-static_assert(tuple::contains<K, adjG>(), "");
+typedef graph::adj<G, edges> adjG;
+static_assert(size<adjG> == 2);
+static_assert(contains<J, adjG>);
+static_assert(contains<K, adjG>);
 
-typedef graph::adj<H, edges>::result adjH;
-static_assert(tuple::size<adjH>() == 1, "");
-static_assert(tuple::contains<K, adjH>(), "");
+typedef graph::adj<H, edges> adjH;
+static_assert(size<adjH> == 1);
+static_assert(contains<K, adjH>);
 
-typedef graph::adj<I, edges>::result adjI;
-static_assert(tuple::size<adjI>() == 1, "");
-static_assert(tuple::contains<L, adjI>(), "");
+typedef graph::adj<I, edges> adjI;
+static_assert(size<adjI> == 1);
+static_assert(contains<L, adjI>);
 
-typedef graph::adj<J, edges>::result adjJ;
-static_assert(tuple::size<adjJ>() == 0, "");
+typedef graph::adj<J, edges> adjJ;
+static_assert(size<adjJ> == 0);
 
-typedef graph::adj<K, edges>::result adjK;
-static_assert(tuple::size<adjK>() == 0, "");
+typedef graph::adj<K, edges> adjK;
+static_assert(size<adjK> == 0);
 
-typedef graph::adj<L, edges>::result adjL;
-static_assert(tuple::size<adjL>() == 0, "");
+typedef graph::adj<L, edges> adjL;
+static_assert(size<adjL> == 0);
 
-typedef graph::sort<edges>::result sorted;
-static_assert(tuple::size<sorted>() == 12, "");
-static_assert(tuple::contains<A, sorted>(), "");
-static_assert(tuple::contains<B, sorted>(), "");
-static_assert(tuple::contains<C, sorted>(), "");
-static_assert(tuple::contains<D, sorted>(), "");
-static_assert(tuple::contains<E, sorted>(), "");
-static_assert(tuple::contains<F, sorted>(), "");
-static_assert(tuple::contains<G, sorted>(), "");
-static_assert(tuple::contains<H, sorted>(), "");
-static_assert(tuple::contains<I, sorted>(), "");
-static_assert(tuple::contains<J, sorted>(), "");
-static_assert(tuple::contains<K, sorted>(), "");
-static_assert(tuple::contains<L, sorted>(), "");
+typedef graph::sort<edges> sorted;
+static_assert(size<sorted> == 12);
+static_assert(contains<A, sorted>);
+static_assert(contains<B, sorted>);
+static_assert(contains<C, sorted>);
+static_assert(contains<D, sorted>);
+static_assert(contains<E, sorted>);
+static_assert(contains<F, sorted>);
+static_assert(contains<G, sorted>);
+static_assert(contains<H, sorted>);
+static_assert(contains<I, sorted>);
+static_assert(contains<J, sorted>);
+static_assert(contains<K, sorted>);
+static_assert(contains<L, sorted>);
 
-static_assert(tuple::before<A, B, sorted>(), "");
-static_assert(tuple::before<A, C, sorted>(), "");
-static_assert(tuple::before<B, D, sorted>(), "");
-static_assert(tuple::before<C, F, sorted>(), "");
-static_assert(tuple::before<D, E, sorted>(), "");
-static_assert(tuple::before<E, G, sorted>(), "");
-static_assert(tuple::before<F, G, sorted>(), "");
-static_assert(tuple::before<G, J, sorted>(), "");
-static_assert(tuple::before<G, K, sorted>(), "");
-static_assert(tuple::before<H, K, sorted>(), "");
-static_assert(tuple::before<I, L, sorted>(), "");
+static_assert(before<A, B, sorted>);
+static_assert(before<A, C, sorted>);
+static_assert(before<B, D, sorted>);
+static_assert(before<C, F, sorted>);
+static_assert(before<D, E, sorted>);
+static_assert(before<E, G, sorted>);
+static_assert(before<F, G, sorted>);
+static_assert(before<G, J, sorted>);
+static_assert(before<G, K, sorted>);
+static_assert(before<H, K, sorted>);
+static_assert(before<I, L, sorted>);
+
+#if 0
+// TODO report cycle by setting a flag rather than asserting
+typedef tuple<
+    graph::edge<A,B>,
+    graph::edge<B,C>,
+    graph::edge<C,A>
+> cycle;
+typedef graph::sort<cycle> boom;
+#endif
 
 }
 

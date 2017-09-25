@@ -30,3 +30,4 @@ TEST_CASE("wocca/sound/network", "Sound processing network"){
     network.process();
     CHECK(order == 4);
 }
+

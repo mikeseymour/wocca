@@ -1,4 +1,7 @@
-CXXFLAGS += -Isrc -std=c++11 -O3 -W -Wall -Wextra -Werror -g -MMD -MP
+CXX=clang++-5.0
+LD=cland++-5.0
+
+CXXFLAGS += -Isrc -std=c++17 -O3 -W -Wall -Wextra -Werror -g -MMD -MP
 #LDLIBS_EXE := obj/wocca/libwocca.a -pthread -lasound
 
 SHELL := /bin/bash

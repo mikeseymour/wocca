@@ -1,64 +1,65 @@
-#ifndef WOCCA_MAGIC_GRAPH_H
-#define WOCCA_MAGIC_GRAPH_H
-
+#pragma once
 #include "wocca/magic/tuple.h"
 
 namespace wocca {
 namespace magic {
 namespace graph {
 
+using namespace tuples;
+
 // An edge of a directed graph. The direction is from Head to Tail.
-template <typename Head, typename Tail> struct edge {};
+template <class Head, class Tail> struct edge {};
 
-// Unordered set of nodes from a set of edges
-template <typename... Edges> struct nodes;
-template <> struct nodes<> : tuple::empty {};
-template <typename Head, typename Tail, typename... Edges> struct nodes<edge<Head, Tail>, Edges...> :
-    tuple::prepend_unique<Head, tuple::prepend_unique<Tail, nodes<Edges...>>> {};
+// Prepend a node to a tuple if it's not already there
+template <class Node, class Tuple> 
+using prepend_unique = conditional<contains<Node,Tuple>, Tuple, prepend<Node,Tuple>>;
 
-template <typename... Edges> struct nodes<std::tuple<Edges...>> : nodes<Edges...> {};
+// Unordered set of nodes derived from a set of edges
+template <class Edges> struct nodes_ {using type = tuple<>;};
+template <class Edges> using nodes = typename nodes_<Edges>::type;
+
+template <class Head, class Tail, class... Edges> 
+struct nodes_<tuple<edge<Head,Tail>, Edges...>> {
+    using type = prepend_unique<Head, prepend_unique<Tail, nodes<tuple<Edges...>>>>;
+};
 
 // The set of nodes adjacent to this one; i.e. those at the tails of edges for which this is the head.
-template <typename Node, typename... Edges> struct adj;
-template <typename Node> struct adj<Node> : tuple::empty {};
-template <typename Node, typename Edge, typename... Edges> struct adj<Node, Edge, Edges...> : adj<Node, Edges...> {};
-template <typename Head, typename Tail, typename... Edges> struct adj<Head, edge<Head, Tail>, Edges...> :
-    tuple::prepend_unique<Tail, adj<Head, Edges...>> {};
+template <class Node, class Edges> struct adj_{using type = tuple<>;};
+template <class Node, class Edges> using adj = typename adj_<Node,Edges>::type;
 
-template <typename Node, typename... Edges> struct adj<Node, std::tuple<Edges...>> : adj<Node, Edges...> {};
+template <class Node, class Edge, class... Edges> 
+struct adj_<Node, tuple<Edge, Edges...>> : adj_<Node, tuple<Edges...>> {};
 
-// Depth-first topological sort details
-namespace dfs_sort {
-    template <typename Nodes, typename Visiting, typename Visited, typename... Edges> struct visit :
-        visit<self<Nodes>, self<Visiting>, self<Visited>, Edges...> {};
-
-    template <bool already_visited, typename Node, typename Visiting, typename Visited, typename... Edges> struct visit_adj;
-    template <typename Node, typename Visiting, typename Visited, typename... Edges>
-    struct visit_adj<true, Node, Visiting, Visited, Edges...> : self<Visited> {};
-    template <typename Node, typename Visiting, typename Visited, typename... Edges>
-    struct visit_adj<false, Node, Visiting, Visited, Edges...> :
-        tuple::prepend<Node, visit<adj<Node, Edges...>, tuple::prepend<Node, Visiting>, Visited, Edges...>> {};
-
-    template <typename Visited, typename Visiting, typename... Edges> struct visit<tuple::empty, Visiting, Visited, Edges...> : self<Visited> {};
-    template <typename Node, typename... Rest, typename Visiting, typename Visited, typename... Edges>
-    struct visit<tuple::make<Node, Rest...>, Visiting, Visited, Edges...> :
-        visit<
-            tuple::make<Rest...>,
-            Visiting,
-            visit_adj<tuple::contains<Node, Visiting>() || tuple::contains<Node, Visited>(), Node, Visiting, Visited, Edges...>,
-            Edges...
-        >
-    {
-        static_assert(!tuple::contains<Node, Visiting>(), "Cycle detected");
-    };
-}
+template <class Head, class Tail, class... Edges> 
+struct adj_<Head, tuple<edge<Head, Tail>, Edges...>> {
+    using type = prepend_unique<Tail, adj<Head, tuple<Edges...>>>;
+};
 
 // Topologically sort the graph, giving the set of nodes ordered so that the
 // head of each edge comes before the corresponding tail.
-template <typename... Edges> struct sort :
-    dfs_sort::visit<nodes<Edges...>, tuple::empty, tuple::empty, Edges...> {};
+template <class Edges, class Nodes = nodes<Edges>, class Visited = tuple<>> 
+    struct sort_ {using type = Visited;};
 
-template <typename... Edges> struct sort<std::tuple<Edges...>> : sort<Edges...> {};
+template <class Edges, class Visited, class Node, class... Nodes>
+struct sort_<Edges, tuple<Node, Nodes...>, Visited> {
+    using add_adj = typename sort_<Edges, adj<Node, Edges>, Visited>::type;
+    using add_node = conditional<contains<Node, Visited>, Visited, prepend<Node, add_adj>>;
+    using type = typename sort_<Edges, tuple<Nodes...>, add_node>::type;
+};
+
+// With cycle detection
+template <class Edges, class Nodes = nodes<Edges>, class Visited = tuple<>, class Visiting = tuple<>> 
+    struct sort_safe {using type = Visited;};
+
+template <class Edges, class Visited, class Visiting, class Node, class... Nodes>
+struct sort_safe<Edges, tuple<Node, Nodes...>, Visited, Visiting> {
+    static_assert(!contains<Node, Visiting>, "Cycle detected");
+    using add_adj = typename sort_safe<Edges, adj<Node, Edges>, Visited, prepend<Node, Visiting>>::type;
+    using add_node = conditional<contains<Node, Visited>, Visited, prepend<Node, add_adj>>;
+    using type = typename sort_safe<Edges, tuple<Nodes...>, add_node, Visiting>::type;
+};
+
+template <class Edges> using sort = typename sort_<Edges>::type;
 
 }}}
-#endif
+
