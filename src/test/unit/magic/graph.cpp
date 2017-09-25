@@ -59,51 +59,51 @@ static_assert(contains<J, nodes>);
 static_assert(contains<K, nodes>);
 static_assert(contains<L, nodes>);
 
-typedef graph::adj<A, edges> adjA;
+typedef graph::adjacent<A, edges> adjA;
 static_assert(size<adjA> == 2);
 static_assert(contains<B, adjA>);
 static_assert(contains<C, adjA>);
 
-typedef graph::adj<B, edges> adjB;
+typedef graph::adjacent<B, edges> adjB;
 static_assert(size<adjB> == 1);
 static_assert(contains<D, adjB>);
 
-typedef graph::adj<C, edges> adjC;
+typedef graph::adjacent<C, edges> adjC;
 static_assert(size<adjC> == 1);
 static_assert(contains<F, adjC>);
 
-typedef graph::adj<D, edges> adjD;
+typedef graph::adjacent<D, edges> adjD;
 static_assert(size<adjD> == 1);
 static_assert(contains<E, adjD>);
 
-typedef graph::adj<E, edges> adjE;
+typedef graph::adjacent<E, edges> adjE;
 static_assert(size<adjE> == 1);
 static_assert(contains<G, adjE>);
 
-typedef graph::adj<F, edges> adjF;
+typedef graph::adjacent<F, edges> adjF;
 static_assert(size<adjF> == 1);
 static_assert(contains<G, adjF>);
 
-typedef graph::adj<G, edges> adjG;
+typedef graph::adjacent<G, edges> adjG;
 static_assert(size<adjG> == 2);
 static_assert(contains<J, adjG>);
 static_assert(contains<K, adjG>);
 
-typedef graph::adj<H, edges> adjH;
+typedef graph::adjacent<H, edges> adjH;
 static_assert(size<adjH> == 1);
 static_assert(contains<K, adjH>);
 
-typedef graph::adj<I, edges> adjI;
+typedef graph::adjacent<I, edges> adjI;
 static_assert(size<adjI> == 1);
 static_assert(contains<L, adjI>);
 
-typedef graph::adj<J, edges> adjJ;
+typedef graph::adjacent<J, edges> adjJ;
 static_assert(size<adjJ> == 0);
 
-typedef graph::adj<K, edges> adjK;
+typedef graph::adjacent<K, edges> adjK;
 static_assert(size<adjK> == 0);
 
-typedef graph::adj<L, edges> adjL;
+typedef graph::adjacent<L, edges> adjL;
 static_assert(size<adjL> == 0);
 
 typedef graph::sort<edges> sorted;
