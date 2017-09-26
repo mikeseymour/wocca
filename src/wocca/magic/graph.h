@@ -35,25 +35,25 @@ struct adj_<Node, tuple<edge<Head,Tail>, Edges...>> {
 
 // Topologically sort the graph, giving the set of nodes ordered so that the
 // head of each edge comes before the corresponding tail.
-template <class Edges, class Nodes = nodes<Edges>, class Visited = tuple<>> 
-    struct sort_ {using type = Visited;};
+template <class Edges, class Nodes = nodes<Edges>, class Sorted = tuple<>> 
+    struct sort_ {using type = Sorted;};
 
-template <class Edges, class Visited, class Node, class... Nodes>
-struct sort_<Edges, tuple<Node, Nodes...>, Visited> {
-    using add_adj = typename sort_<Edges, adjacent<Node, Edges>, Visited>::type;
-    using add_node = conditional<contains<Node, Visited>, Visited, prepend<Node, add_adj>>;
+template <class Edges, class Sorted, class Node, class... Nodes>
+struct sort_<Edges, tuple<Node, Nodes...>, Sorted> {
+    using add_adj = typename sort_<Edges, adjacent<Node, Edges>, Sorted>::type;
+    using add_node = conditional<contains<Node, Sorted>, Sorted, prepend<Node, add_adj>>;
     using type = typename sort_<Edges, tuple<Nodes...>, add_node>::type;
 };
 
 // With cycle detection
-template <class Edges, class Nodes = nodes<Edges>, class Visited = tuple<>, class Visiting = tuple<>> 
-    struct sort_safe {using type = Visited;};
+template <class Edges, class Nodes = nodes<Edges>, class Sorted = tuple<>, class Visiting = tuple<>> 
+    struct sort_safe {using type = Sorted;};
 
-template <class Edges, class Visited, class Visiting, class Node, class... Nodes>
-struct sort_safe<Edges, tuple<Node, Nodes...>, Visited, Visiting> {
+template <class Edges, class Sorted, class Visiting, class Node, class... Nodes>
+struct sort_safe<Edges, tuple<Node, Nodes...>, Sorted, Visiting> {
     static_assert(!contains<Node, Visiting>, "Cycle detected");
-    using add_adj = typename sort_safe<Edges, adjacent<Node, Edges>, Visited, prepend<Node, Visiting>>::type;
-    using add_node = conditional<contains<Node, Visited>, Visited, prepend<Node, add_adj>>;
+    using add_adj = typename sort_safe<Edges, adjacent<Node, Edges>, Sorted, prepend<Node, Visiting>>::type;
+    using add_node = conditional<contains<Node, Sorted>, Sorted, prepend<Node, add_adj>>;
     using type = typename sort_safe<Edges, tuple<Nodes...>, add_node, Visiting>::type;
 };
 
