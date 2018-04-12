@@ -19,8 +19,7 @@ struct parser {
 	}
 
 	template <int key> view at() {
-		constexpr int i = index(key);
-		static_assert(i >= 0);
+		static_assert(index(key) >= 0);
 		return values[index(key)];
 	}
 
