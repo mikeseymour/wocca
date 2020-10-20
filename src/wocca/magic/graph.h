@@ -11,21 +11,23 @@ using namespace tuples;
 template <class Head, class Tail> struct edge {};
 
 // Prepend a node to a tuple if it's not already there
-template <class Node, class Tuple> 
-using prepend_unique = conditional<contains<Node,Tuple>, Tuple, prepend<Node,Tuple>>;
+template <class Node, class Tuple> using prepend_unique_ =
+    conditional_<contains<Node,Tuple>, Tuple, prepend<Node,Tuple>>;
+template <class Node, class Tuple> using prepend_unique =
+    unwrap<prepend_unique_<Node, Tuple>>;
 
 // Unordered set of nodes derived from a set of edges
-template <class Edges> struct nodes_ {using type = tuple<>;};
-template <class Edges> using nodes = typename nodes_<Edges>::type;
+template <class Edges> struct nodes_ : wrap<tuple<>> {};
+template <class Edges> using nodes = unwrap<nodes_<Edges>>;
 
 template <class Head, class Tail, class... Edges> 
-struct nodes_<tuple<edge<Head,Tail>, Edges...>> {
-    using type = prepend_unique<Head, prepend_unique<Tail, nodes<tuple<Edges...>>>>;
-};
+struct nodes_<tuple<edge<Head,Tail>, Edges...>> :
+    prepend_unique_<Head, prepend_unique<Tail, nodes<tuple<Edges...>>>> {};
 
-// The set of nodes adjacent to this one; i.e. those at the tails of edges for which this is the head.
-template <class Node, class Edges> struct adj_{using type = tuple<>;};
-template <class Node, class Edges> using adjacent = typename adj_<Node,Edges>::type;
+// The set of nodes adjacent to this one; i.e. those at the tails of edges for
+// which this is the head.
+template <class Node, class Edges> struct adj_ : wrap<tuple<>> {};
+template <class Node, class Edges> using adjacent = unwrap<adj_<Node,Edges>>;
 
 template <class Node, class Head, class Tail, class... Edges> 
 struct adj_<Node, tuple<edge<Head,Tail>, Edges...>> {
@@ -35,29 +37,45 @@ struct adj_<Node, tuple<edge<Head,Tail>, Edges...>> {
 
 // Topologically sort the graph, giving the set of nodes ordered so that the
 // head of each edge comes before the corresponding tail.
-template <class Edges, class Nodes = nodes<Edges>, class Sorted = tuple<>> 
-    struct sort_ {using type = Sorted;};
+template <class Sorted_, class Visiting, class Edges, class Nodes>
+    struct sort_ : Sorted_ {};
 
-template <class Edges, class Sorted, class Node, class... Nodes>
-struct sort_<Edges, tuple<Node, Nodes...>, Sorted> {
-    using add_adj = typename sort_<Edges, adjacent<Node, Edges>, Sorted>::type;
-    using add_node = conditional<contains<Node, Sorted>, Sorted, prepend<Node, add_adj>>;
-    using type = typename sort_<Edges, tuple<Nodes...>, add_node>::type;
-};
+struct cyclic : wrap<cyclic> {};
 
-// With cycle detection
-template <class Edges, class Nodes = nodes<Edges>, class Sorted = tuple<>, class Visiting = tuple<>> 
-    struct sort_safe {using type = Sorted;};
+template <class Node, class Sorted>
+    struct prepend_node_ : prepend_<Node, Sorted> {};
+template <class Node>
+    struct prepend_node_<Node, cyclic> : cyclic {};
 
-template <class Edges, class Sorted, class Visiting, class Node, class... Nodes>
-struct sort_safe<Edges, tuple<Node, Nodes...>, Sorted, Visiting> {
-    static_assert(!contains<Node, Visiting>, "Cycle detected");
-    using add_adj = typename sort_safe<Edges, adjacent<Node, Edges>, Sorted, prepend<Node, Visiting>>::type;
-    using add_node = conditional<contains<Node, Sorted>, Sorted, prepend<Node, add_adj>>;
-    using type = typename sort_safe<Edges, tuple<Nodes...>, add_node, Visiting>::type;
-};
+template <class Sorted_, class Visiting, class Edges, class Node, class Nodes>
+struct sort_no_cycle_ :
+    sort_<
+        conditional<
+            contains<Node, unwrap<Sorted_>>,
+            Sorted_,
+            prepend_node_<
+                Node,
+                unwrap<sort_<
+                    Sorted_,
+                    prepend<Node, Visiting>,
+                    Edges,
+                    adjacent<Node, Edges>
+                >>
+            >
+        >,
+        Visiting, Edges, Nodes
+    > {};
 
-template <class Edges> using sort = typename sort_<Edges>::type;
+template <class Sorted_, class Visiting, class Edges, class Node, class... Nodes>
+struct sort_<Sorted_, Visiting, Edges, tuple<Node, Nodes...>> :
+    conditional<
+        same<Sorted_, cyclic> || contains<Node, Visiting>,
+        cyclic,
+        sort_no_cycle_<Sorted_, Visiting, Edges, Node, tuple<Nodes...>>
+    > {};
+
+template <class Edges>
+using sort = unwrap<sort_<wrap<tuple<>>, tuple<>, Edges, nodes<Edges>>>;
 
 }}}
 

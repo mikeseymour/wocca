@@ -133,15 +133,13 @@ static_assert(before<G, K, sorted>);
 static_assert(before<H, K, sorted>);
 static_assert(before<I, L, sorted>);
 
-#if 0
-// TODO report cycle by setting a flag rather than asserting
 typedef tuple<
     graph::edge<A,B>,
     graph::edge<B,C>,
     graph::edge<C,A>
 > cycle;
-typedef graph::sort<cycle> boom;
-#endif
+
+static_assert(same<graph::sort<cycle>, graph::cyclic>);
 
 }
 
