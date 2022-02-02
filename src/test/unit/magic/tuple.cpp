@@ -1,6 +1,8 @@
 #include "wocca/magic/tuple.h"
 #include "test/catch.hpp"
 
+#include <sstream>
+
 namespace {
 using namespace wocca::magic;
 using namespace tuples;
