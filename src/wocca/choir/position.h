@@ -15,17 +15,30 @@ namespace choir {
 template <typename U, typename S = std::make_signed_t<U>>
 struct position_details
 {
-  struct pos {U val;};
-  struct off {S val;};
+  struct off
+  {
+    S val;
 
-  friend pos operator+(pos x, off y) {return {U(x.val + y.val)};}
-  friend pos operator+(off x, pos y) {return {U(x.val + y.val)};}
-  friend pos operator-(pos x, off y) {return {U(x.val - y.val)};}
+    off& operator+=(off o) {val += o.val; return *this;}
+    off& operator-=(off o) {val -= o.val; return *this;}
+  };
+
+  struct pos
+  {
+    U val;
+
+    pos& operator+=(off o) {val += o.val; return *this;}
+    pos& operator-=(off o) {val -= o.val; return *this;}
+  };
+
+  friend pos operator+(pos x, off y) {return x += y;}
+  friend pos operator+(off x, pos y) {return y += x;}
+  friend pos operator-(pos x, off y) {return x -= y;}
 
   friend off operator-(pos x, pos y) {return {S(x.val - y.val)};}
 
-  friend off operator+(off x, off y) {return {S(x.val + y.val)};}
-  friend off operator-(off x, off y) {return {S(x.val - y.val)};}
+  friend off operator+(off x, off y) {return x += y;}
+  friend off operator-(off x, off y) {return x -= y;}
   friend off operator-(off x)        {return {S(-x.val)};}
 
   friend bool operator==(pos x, pos y) {return x.val == y.val;}

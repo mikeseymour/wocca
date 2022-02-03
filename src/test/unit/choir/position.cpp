@@ -36,5 +36,22 @@ TEST_CASE("wocca/choir/position", "Position/offset arithmetic"){
   CHECK(pos{0x7f} < pos{0x80});
   CHECK(pos{0x80} < pos{0x81});
   CHECK(pos{0xff} < pos{0x00});
+
+  pos p{5};
+
+  CHECK((p += off{2}) == pos{7});
+  CHECK(p == pos{7});
+  CHECK((p -= off{2}) == pos{5});
+  CHECK(p == pos{5});
+  CHECK((p -= off{7}) == pos{0xfe});
+  CHECK(p == pos{0xfe});
+  CHECK((p += off{6}) == pos{4});
+  CHECK(p == pos{4});
+
+  off o{3};
+  CHECK((o += off{2}) == off{5});
+  CHECK(o == off{5});
+  CHECK((o -= off{2}) == off{3});
+  CHECK(o == off{3});
 }
 
