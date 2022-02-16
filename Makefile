@@ -1,4 +1,4 @@
-CXXFLAGS += -Isrc -std=c++17 -O3 -W -Wall -Wextra -Werror -g -MMD -MP
+CXXFLAGS += -Isrc -std=c++20 -O3 -W -Wall -Wextra -Werror -g -MMD -MP
 #LDLIBS_EXE := obj/wocca/libwocca.a -pthread -lasound
 
 SHELL := /bin/bash
