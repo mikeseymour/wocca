@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <iomanip>
 
 namespace wocca {
 namespace choir {
@@ -25,6 +26,20 @@ struct span
 
   bool empty() const {return size() == 0;}
   bool contains(spot s) const {return offset(s) < size();}
+  bool touches(spot s) const {return offset(s) <= size();}
+
+  template <typename Stream>
+  friend Stream& operator<<(Stream& stream, span s)
+  {
+    return stream << std::hex << '[' << +s.begin() << ',' << +s.end() << ')';
+  }
+
+  friend bool operator==(span x, span y)
+  {
+    return x.begin() == y.begin() && x.end() == y.end();
+  }
+
+  friend bool operator!=(span x, span y) {return !(x == y);}
 };
 
 }}
